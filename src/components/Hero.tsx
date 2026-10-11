@@ -112,12 +112,12 @@ export default function Hero() {
       ref={sectionRef}
       onPointerMove={onPointerMove}
       onPointerLeave={() => spotRef.current && (spotRef.current.style.opacity = '0')}
-      className="relative min-h-[100svh] flex items-center overflow-hidden bg-black"
+      className="relative min-h-[100svh] flex items-center overflow-hidden hero-bg"
     >
       <div ref={bgRef} className="absolute inset-0 z-0 will-change-transform">
         <img src={heroImage} srcSet={responsiveSrcSet(heroImage)} sizes="100vw" alt="" decoding="async" className="w-full h-full object-cover hero-kenburns" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-black/40" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/30" />
+        <div className="absolute inset-0 hero-shade-side" />
+        <div className="absolute inset-0 hero-shade-bottom" />
       </div>
       <div className="absolute inset-0 z-0 industrial-pattern opacity-30" />
       <div className="absolute inset-0 z-0 vignette" />
@@ -129,10 +129,10 @@ export default function Hero() {
             <span className="w-2 h-2 rounded-full bg-yellow-accent animate-pulse" />
             <span className="text-yellow-accent text-sm font-semibold tracking-wide">{t.hero.badge}</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-white leading-[1.15] tracking-tight mb-6">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black hero-text leading-[1.15] tracking-tight mb-6">
             <RevealWords text={lang === 'ar' ? (banner?.title_ar || headline) : (banner?.title_en || headline)} />
           </h1>
-          <p className="text-lg lg:text-xl text-gray-300 leading-relaxed mb-8 max-w-xl animate-fade-in-up delay-200">
+          <p className="text-lg lg:text-xl hero-text-soft leading-relaxed mb-8 max-w-xl animate-fade-in-up delay-200">
             {lang === 'ar' ? (banner?.subtitle_ar || subtext) : (banner?.subtitle_en || subtext)}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up delay-300">
@@ -145,18 +145,18 @@ export default function Hero() {
               <ChevronLeft size={18} className={`transition-transform group-hover:-translate-x-1 ${dir === 'rtl' ? 'rotate-180 group-hover:translate-x-1' : ''}`} />
             </a>
           </div>
-          <div className="grid grid-cols-3 gap-3 sm:gap-6 mt-16 pt-8 border-t border-white/10 animate-fade-in-up delay-500">
+          <div className="grid grid-cols-3 gap-3 sm:gap-6 mt-16 pt-8 border-t hero-line animate-fade-in-up delay-500">
             {t.company.stats.map((stat, i) => (
               <div key={i}>
                 <div className="text-lg min-[400px]:text-xl sm:text-2xl lg:text-3xl font-black text-yellow-accent mb-1 tabular-nums break-words"><CountUp value={stat.value} /></div>
-                <div className="text-xs lg:text-sm text-gray-400 font-medium">{stat.label}</div>
+                <div className="text-xs lg:text-sm hero-text-faint font-medium">{stat.label}</div>
               </div>
             ))}
           </div>
         </div>
       </div>
       <a href="#equipment" aria-label={lang === 'ar' ? 'انتقل للأسفل' : 'Scroll down'} className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 hidden lg:flex flex-col items-center gap-2 animate-fade-in delay-600">
-        <div className="w-6 h-10 rounded-full border-2 border-white/30 flex items-start justify-center p-1.5">
+        <div className="w-6 h-10 rounded-full border-2 hero-line flex items-start justify-center p-1.5">
           <div className="w-1 h-2 rounded-full bg-yellow-accent animate-bounce" />
         </div>
       </a>

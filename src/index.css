@@ -368,8 +368,48 @@ section[id] {
 }
 .vignette {
   pointer-events: none;
-  background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.65) 100%);
+  background: radial-gradient(ellipse at center, transparent 45%, rgb(var(--hero-rgb) / 0.65) 100%);
 }
+
+/* ─── Hero (front page) colours: dark photo look in dark mode, light wash in light mode ─── */
+:root {
+  --hero-rgb: 0 0 0;
+  --hero-text: #ffffff;
+  --hero-text-soft: #d1d5db;
+  --hero-text-faint: #9ca3af;
+  --hero-line: rgba(255, 255, 255, 0.1);
+  --hero-nav: rgba(255, 255, 255, 0.8);
+  --hero-side-mid: 0.8;
+  --hero-side-end: 0.4;
+}
+[data-theme='light'] {
+  --hero-rgb: 245 245 245;
+  --hero-text: #0a0a0a;
+  --hero-text-soft: #3f3f46;
+  --hero-text-faint: #52525b;
+  --hero-line: rgba(0, 0, 0, 0.12);
+  --hero-nav: rgba(10, 10, 10, 0.75);
+  --hero-side-mid: 0.85;
+  --hero-side-end: 0.55;
+}
+.hero-bg { background-color: rgb(var(--hero-rgb)); }
+.hero-shade-side {
+  background: linear-gradient(to right, rgb(var(--hero-rgb)) 0%, rgb(var(--hero-rgb) / var(--hero-side-mid)) 50%, rgb(var(--hero-rgb) / var(--hero-side-end)) 100%);
+}
+/* Light mode: keep the light wash behind the text side so dark text stays readable. */
+[data-theme='light'][dir='rtl'] .hero-shade-side {
+  background: linear-gradient(to left, rgb(var(--hero-rgb)) 0%, rgb(var(--hero-rgb) / var(--hero-side-mid)) 50%, rgb(var(--hero-rgb) / var(--hero-side-end)) 100%);
+}
+.hero-shade-bottom {
+  background: linear-gradient(to top, rgb(var(--hero-rgb)) 0%, transparent 50%, rgb(var(--hero-rgb) / 0.3) 100%);
+}
+.hero-text { color: var(--hero-text); }
+.hero-text-soft { color: var(--hero-text-soft); }
+.hero-text-faint { color: var(--hero-text-faint); }
+.hero-line { border-color: var(--hero-line); }
+.hero-nav-link { color: var(--hero-nav); }
+.hero-nav-link:hover { color: var(--hero-text); }
+.header-over-hero { background: linear-gradient(to bottom, rgb(var(--hero-rgb) / 0.6), transparent); }
 
 /* Light sweep across primary buttons */
 @layer components {
