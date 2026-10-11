@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode, useLayoutEffect } from 'react';
 import { translations, type Language, type Translation } from '@/i18n/translations';
 
 type Theme = 'dark' | 'light';
@@ -52,10 +52,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
     store(LANG_KEY, lang);
   }, [dir, lang]);
 
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
+  // Apply before paint. Transitions are paused for one frame so every surface
+  // switches at once instead of fading at different speeds.
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    if (root.getAttribute('data-theme') !== theme) {
+      root.classList.add('theme-switching');
+      root.setAttribute('data-theme', theme);
+      void root.offsetHeight;
+      requestAnimationFrame(() => requestAnimationFrame(() => root.classList.remove('theme-switching')));
+    }
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'light' ? '#f5f5f5' : '#0a0a0a');
     store(THEME_KEY, theme);
   }, [theme]);
+
+  // Keep other open tabs in sync.
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === THEME_KEY && (e.newValue === 'dark' || e.newValue === 'light')) setTheme(e.newValue);
+      if (e.key === LANG_KEY && (e.newValue === 'ar' || e.newValue === 'en')) setLang(e.newValue);
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   const toggleLang = () => setLang((prev) => (prev === 'ar' ? 'en' : 'ar'));
   const toggleTheme = () => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));

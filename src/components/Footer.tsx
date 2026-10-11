@@ -207,19 +207,19 @@ export default function Footer() {
               {unifiedNumber && (
                 <li className="text-sm text-base-muted">
                   {isRtl ? 'الرقم الوطني الموحد' : 'Unified National Number'}:
-                  <span className="text-base-primary block text-xs mt-0.5" dir="ltr">{unifiedNumber}</span>
+                  <span className="text-base-primary block text-sm font-semibold mt-0.5 tabular-nums"><bdi dir="ltr">{unifiedNumber}</bdi></span>
                 </li>
               )}
               {crNumber && (
                 <li className="text-sm text-base-muted">
                   {isRtl ? 'رقم السجل التجاري' : 'CR Number'}:
-                  <span className="text-base-primary block text-xs mt-0.5">{crNumber}</span>
+                  <span className="text-base-primary block text-sm font-semibold mt-0.5 tabular-nums"><bdi dir="ltr">{crNumber}</bdi></span>
                 </li>
               )}
               {vatNumber && (
                 <li className="text-sm text-base-muted">
                   {isRtl ? 'الرقم الضريبي' : 'VAT Number'}:
-                  <span className="text-base-primary block text-xs mt-0.5">{vatNumber}</span>
+                  <span className="text-base-primary block text-sm font-semibold mt-0.5 tabular-nums"><bdi dir="ltr">{vatNumber}</bdi></span>
                 </li>
               )}
             </ul>
