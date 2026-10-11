@@ -4,9 +4,16 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%23FACC15'/%3E%3Ctext x='20' y='28' font-family='system-ui' font-size='24' font-weight='900' text-anchor='middle' fill='%23000'%3ES%3C/text%3E%3C/svg%3E" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a0a0a" />
     <title>Sahab B2B Website</title>
     <script>
-      try { if (localStorage.getItem('sahab.theme') === 'light') document.documentElement.setAttribute('data-theme', 'light'); } catch (e) {}
+      (function () {
+        var t = 'dark';
+        try { if (localStorage.getItem('sahab.theme') === 'light') t = 'light'; } catch (e) {}
+        document.documentElement.setAttribute('data-theme', t);
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', t === 'light' ? '#f5f5f5' : '#0a0a0a');
+      })();
     </script>
 
     <meta property="og:image" content="https://bolt.new/static/og_default.png">
