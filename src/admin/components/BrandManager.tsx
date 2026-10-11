@@ -102,6 +102,7 @@ export default function BrandManager() {
         <div>
           <h1 className="text-2xl lg:text-3xl font-black text-base-primary mb-1">{lang === 'ar' ? 'إدارة الماركات' : 'Brand Management'}</h1>
           <p className="text-base-muted text-sm">{lang === 'ar' ? `${brands.length} ماركة` : `${brands.length} brands`}</p>
+          <p className="text-xs text-base-muted mt-1">{lang === 'ar' ? 'تظهر الماركة للعملاء داخل الفئة بمجرد إضافة معدة منها (من «إدارة المعدات» أو زر «ماركة جديدة» في نموذج المعدة).' : 'A brand appears to customers inside a category once a model of that brand is added (from Equipment, or "New brand" in the model form).'}</p>
         </div>
         <button onClick={openAdd} className="btn-primary text-sm"><Plus size={16} /> {lang === 'ar' ? 'إضافة ماركة' : 'Add Brand'}</button>
       </div>
