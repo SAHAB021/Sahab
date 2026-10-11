@@ -98,7 +98,7 @@ export default function Header() {
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled || mobileOpen
           ? 'bg-elevated/90 backdrop-blur-xl border-b border-base shadow-lg'
-          : 'bg-gradient-to-b from-black/60 to-transparent'
+          : 'header-over-hero'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -139,7 +139,7 @@ export default function Header() {
                   href={item.href}
                   aria-current={active ? 'page' : undefined}
                   className={`relative px-2 xl:px-3 py-2 text-sm font-semibold whitespace-nowrap transition-colors group ${
-                    active ? 'text-yellow-accent' : scrolled ? 'text-base-muted hover:text-base-primary' : 'text-white/80 hover:text-white'
+                    active ? 'text-yellow-accent' : scrolled ? 'text-base-muted hover:text-base-primary' : 'hero-nav-link'
                   }`}
                 >
                   {item.label}
