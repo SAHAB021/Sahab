@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { loadAdminCatalog } from '@/catalog/catalogApi';
 import type { AdminCategoryRow, AdminBrandRow, AdminModelRow, AdminVariantRow } from '@/catalog/catalogApi';
@@ -21,12 +21,12 @@ interface AdminContextValue {
   updateModelAvailability: (id: string, availability: string) => Promise<void>;
   reorderModel: (id: string, dir: 'up' | 'down') => Promise<void>;
   setModelVariants: (modelId: string, variants: AdminVariantRow[]) => Promise<void>;
-  addCategory: (data: Partial<AdminCategoryRow>) => Promise<void>;
+  addCategory: (data: Partial<AdminCategoryRow>) => Promise<string>;
   updateCategory: (id: string, data: Partial<AdminCategoryRow>) => Promise<void>;
   deleteCategory: (id: string) => Promise<void>;
   toggleCategoryHidden: (id: string, hidden: boolean) => Promise<void>;
   reorderCategory: (id: string, dir: 'up' | 'down') => Promise<void>;
-  addBrand: (data: Partial<AdminBrandRow>) => Promise<void>;
+  addBrand: (data: Partial<AdminBrandRow>) => Promise<string>;
   updateBrand: (id: string, data: Partial<AdminBrandRow>) => Promise<void>;
   deleteBrand: (id: string) => Promise<void>;
   toggleBrandHidden: (id: string, hidden: boolean) => Promise<void>;
@@ -34,6 +34,19 @@ interface AdminContextValue {
 }
 
 const AdminContext = createContext<AdminContextValue | undefined>(undefined);
+
+/** Use whichever name was typed for the missing language; reject when both are empty. */
+function bothNames<T extends { name_ar?: string; name_en?: string }>(data: T): T {
+  const ar = (data.name_ar || '').trim();
+  const en = (data.name_en || '').trim();
+  if (!ar && !en) throw new Error('الاسم مطلوب (عربي أو إنجليزي) / A name is required (Arabic or English)');
+  return { ...data, name_ar: ar || en, name_en: en || ar };
+}
+
+const slugify = (text: string) =>
+  text.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
+const nextOrder = (rows: { display_order: number }[]) => rows.reduce((m, r) => Math.max(m, r.display_order || 0), 0) + 1;
 
 export function AdminProvider({ children }: { children: ReactNode }) {
   const [categories, setCategories] = useState<AdminCategoryRow[]>([]);
@@ -43,8 +56,11 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const [view, setView] = useState<AdminView>('dashboard');
   const [loading, setLoading] = useState(true);
 
+  // Only the first load shows the full-page spinner. Later refreshes (after adding a
+  // brand, saving a model, ...) run in the background so open forms stay open.
+  const loadedOnce = useRef(false);
   const reload = async () => {
-    setLoading(true);
+    if (!loadedOnce.current) setLoading(true);
     try {
       const data = await loadAdminCatalog();
       setCategories(data.categories);
@@ -54,6 +70,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     } catch {
       // keep empty state
     } finally {
+      loadedOnce.current = true;
       setLoading(false);
     }
   };
@@ -121,7 +138,8 @@ export function AdminProvider({ children }: { children: ReactNode }) {
 
   const setModelVariants = async (modelId: string, newVariants: AdminVariantRow[]) => {
     // Delete existing variants, then insert new ones
-    await supabase.from('equipment_variants').delete().eq('model_id', modelId);
+    const { error: deleteError } = await supabase.from('equipment_variants').delete().eq('model_id', modelId);
+    if (deleteError) throw deleteError;
     if (newVariants.length > 0) {
       const inserts = newVariants.map((v) => ({
         id: v.id,
@@ -139,14 +157,24 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   };
 
   // ─── Categories ────────────────────────────────────────────
-  const addCategory = async (data: Partial<AdminCategoryRow>) => {
-    const { error } = await supabase.from('categories').insert(data);
+  const addCategory = async (data: Partial<AdminCategoryRow>): Promise<string> => {
+    const row = bothNames(data);
+    const { data: inserted, error } = await supabase
+      .from('categories')
+      .insert({
+        ...row,
+        slug: (row.slug || '').trim() || slugify(row.name_en || '') || `category-${Date.now()}`,
+        display_order: row.display_order && row.display_order > 0 ? row.display_order : nextOrder(categories),
+      })
+      .select('id')
+      .single();
     if (error) throw error;
     await reload();
+    return inserted.id as string;
   };
 
   const updateCategory = async (id: string, data: Partial<AdminCategoryRow>) => {
-    const { error } = await supabase.from('categories').update(data).eq('id', id);
+    const { error } = await supabase.from('categories').update('name_ar' in data || 'name_en' in data ? bothNames(data) : data).eq('id', id);
     if (error) throw error;
     await reload();
   };
@@ -179,14 +207,20 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   };
 
   // ─── Brands ────────────────────────────────────────────────
-  const addBrand = async (data: Partial<AdminBrandRow>) => {
-    const { error } = await supabase.from('brands').insert(data);
+  const addBrand = async (data: Partial<AdminBrandRow>): Promise<string> => {
+    const row = bothNames(data);
+    const { data: inserted, error } = await supabase
+      .from('brands')
+      .insert({ ...row, display_order: row.display_order && row.display_order > 0 ? row.display_order : nextOrder(brands) })
+      .select('id')
+      .single();
     if (error) throw error;
     await reload();
+    return inserted.id as string;
   };
 
   const updateBrand = async (id: string, data: Partial<AdminBrandRow>) => {
-    const { error } = await supabase.from('brands').update(data).eq('id', id);
+    const { error } = await supabase.from('brands').update('name_ar' in data || 'name_en' in data ? bothNames(data) : data).eq('id', id);
     if (error) throw error;
     await reload();
   };

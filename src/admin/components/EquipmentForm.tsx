@@ -6,6 +6,58 @@ import ImageUploader from '@/components/ImageUploader';
 import type { AdminModelRow, AdminVariantRow } from '@/catalog/catalogApi';
 import type { SpecField } from '@/catalog/types';
 
+/** "+ New" next to a select: create a brand / category without leaving the form. */
+function QuickAdd({ kind, onCreate, inputClass }: { kind: 'brand' | 'category'; onCreate: (nameAr: string, nameEn: string) => Promise<void>; inputClass: string }) {
+  const { lang } = useApp();
+  const ar = lang === 'ar';
+  const [open, setOpen] = useState(false);
+  const [nameAr, setNameAr] = useState('');
+  const [nameEn, setNameEn] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  const label = kind === 'brand' ? (ar ? 'ماركة جديدة' : 'New brand') : (ar ? 'فئة جديدة' : 'New category');
+
+  if (!open) {
+    return (
+      <button type="button" onClick={() => setOpen(true)} className="mt-1.5 text-xs font-bold text-yellow-accent hover:underline inline-flex items-center gap-1">
+        <Plus size={12} /> {label}
+      </button>
+    );
+  }
+  const submit = async () => {
+    if (!nameAr.trim() && !nameEn.trim()) {
+      setErr(ar ? 'اكتب الاسم' : 'Enter a name');
+      return;
+    }
+    setBusy(true);
+    setErr('');
+    try {
+      await onCreate(nameAr, nameEn);
+      setOpen(false);
+      setNameAr('');
+      setNameEn('');
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : ar ? 'تعذر الإضافة' : 'Could not add');
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="mt-2 p-3 rounded-lg border border-yellow-accent/30 bg-yellow-accent/5 space-y-2">
+      <div className="text-xs font-bold text-base-primary">{label}</div>
+      <input className={inputClass} placeholder={ar ? 'الاسم بالعربي' : 'Arabic name'} value={nameAr} onChange={(e) => setNameAr(e.target.value)} />
+      <input className={inputClass} dir="ltr" placeholder={ar ? 'الاسم بالإنجليزي' : 'English name'} value={nameEn} onChange={(e) => setNameEn(e.target.value)} />
+      {err && <div className="text-xs text-red-500">{err}</div>}
+      <div className="flex gap-2">
+        <button type="button" onClick={submit} disabled={busy} className="btn-primary text-xs px-3 py-1.5 disabled:opacity-60">
+          {busy ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />} {ar ? 'إضافة' : 'Add'}
+        </button>
+        <button type="button" onClick={() => setOpen(false)} className="text-xs text-base-muted hover:text-base-primary px-2">{ar ? 'إلغاء' : 'Cancel'}</button>
+      </div>
+    </div>
+  );
+}
+
 interface EquipmentFormProps {
   editingModel: AdminModelRow | null;
   onClose: () => void;
@@ -68,7 +120,7 @@ export default function EquipmentForm({ editingModel, onClose }: EquipmentFormPr
   const { lang } = useApp();
   const {
     categories, brands, variants,
-    addModel, updateModel, setModelVariants,
+    addModel, updateModel, setModelVariants, addBrand, addCategory,
   } = useAdmin();
 
   const [saving, setSaving] = useState(false);
@@ -90,8 +142,11 @@ export default function EquipmentForm({ editingModel, onClose }: EquipmentFormPr
         }
       : createEmptyModel()
   );
-  const [modelVariants, setModelVariantsState] = useState<AdminVariantRow[]>(
-    existingVariants.map((v) => ({ ...v, specs: { ...v.specs } }))
+  // A new model starts with one size row so it is never saved without a size.
+  const [modelVariants, setModelVariantsState] = useState<AdminVariantRow[]>(() =>
+    editingModel
+      ? existingVariants.map((v) => ({ ...v, specs: { ...v.specs } }))
+      : [createEmptyVariant(1)]
   );
   const [activeTab, setActiveTab] = useState<'basic' | 'variants' | 'gallery' | 'rental' | 'features'>('basic');
 
@@ -164,18 +219,37 @@ export default function EquipmentForm({ editingModel, onClose }: EquipmentFormPr
 
   // ─── Save ───────────────────────────────────────────────────
   const save = async () => {
-    setSaving(true);
     setError('');
+    // Customers pick a size before requesting, so at least one named size is required.
+    const sizes = modelVariants
+      .map((v) => {
+        const ar = v.size_label_ar.trim();
+        const en = v.size_label_en.trim();
+        return { ...v, size_label_ar: ar || en, size_label_en: en || ar };
+      })
+      .filter((v) => v.size_label_ar);
+    if (sizes.length === 0) {
+      setError(lang === 'ar'
+        ? 'أضف حجماً واحداً على الأقل (مثل «20 طن») في تبويب «الأحجام والمواصفات» — بدونه لا يستطيع العميل اختيار المعدة وطلبها.'
+        : 'Add at least one size (e.g. "20 Ton") in the "Variants & Specs" tab — without it customers cannot choose and request this model.');
+      if (modelVariants.length === 0) addVariant();
+      setActiveTab('variants');
+      return;
+    }
+    if (!sizes.some((v) => v.published)) {
+      setError(lang === 'ar' ? 'اجعل حجماً واحداً على الأقل «منشوراً» ليظهر للعملاء.' : 'Mark at least one size as "Published" so customers can see it.');
+      setActiveTab('variants');
+      return;
+    }
+    setSaving(true);
     try {
       const { id: _id, ...payload } = model;
       if (editingModel) {
         await updateModel(editingModel.id, payload);
-        await setModelVariants(editingModel.id, modelVariants);
+        await setModelVariants(editingModel.id, sizes);
       } else {
         const newId = await addModel(payload);
-        if (modelVariants.length > 0) {
-          await setModelVariants(newId, modelVariants);
-        }
+        await setModelVariants(newId, sizes);
       }
       onClose();
     } catch (e: any) {
@@ -221,6 +295,11 @@ export default function EquipmentForm({ editingModel, onClose }: EquipmentFormPr
               }`}
             >
               {lang === 'ar' ? tab.labelAr : tab.labelEn}
+              {tab.id === 'variants' && (
+                <span className={`ms-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold ${modelVariants.some((v) => (v.size_label_ar || v.size_label_en).trim()) ? 'bg-yellow-accent/10 text-yellow-accent' : 'bg-red-500/15 text-red-500'}`}>
+                  {modelVariants.filter((v) => (v.size_label_ar || v.size_label_en).trim()).length}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -250,6 +329,7 @@ export default function EquipmentForm({ editingModel, onClose }: EquipmentFormPr
                     <option value="">{lang === 'ar' ? 'اختر فئة' : 'Select category'}</option>
                     {categories.map((c) => <option key={c.id} value={c.id}>{lang === 'ar' ? c.name_ar : c.name_en}</option>)}
                   </select>
+                  <QuickAdd kind="category" inputClass={inputClass} onCreate={async (nameAr, nameEn) => updateField('category_id', await addCategory({ name_ar: nameAr, name_en: nameEn }))} />
                 </div>
                 <div>
                   <label className={labelClass}>{lang === 'ar' ? 'الماركة' : 'Brand'} *</label>
@@ -257,6 +337,7 @@ export default function EquipmentForm({ editingModel, onClose }: EquipmentFormPr
                     <option value="">{lang === 'ar' ? 'اختر ماركة' : 'Select brand'}</option>
                     {brands.map((b) => <option key={b.id} value={b.id}>{lang === 'ar' ? b.name_ar : b.name_en}</option>)}
                   </select>
+                  <QuickAdd kind="brand" inputClass={inputClass} onCreate={async (nameAr, nameEn) => updateField('brand_id', await addBrand({ name_ar: nameAr, name_en: nameEn }))} />
                 </div>
                 <div>
                   <label className={labelClass}>{lang === 'ar' ? 'سنة الصنع' : 'Year'}</label>

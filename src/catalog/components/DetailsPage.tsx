@@ -105,6 +105,14 @@ export default function DetailsPage() {
             <h3 className="text-sm font-bold text-base-primary uppercase tracking-wider mb-3">
               {lang === 'ar' ? 'اختر الحجم / السعة' : 'Select Size / Capacity'}
             </h3>
+            {sortedVariants.length === 0 && (
+              <p className="text-sm text-base-muted p-3 rounded-lg border border-dashed border-base">
+                {lang === 'ar'
+                  ? 'لم تُحدَّد أحجام هذه المعدة بعد. تواصل مع فريق سحاب لطلبها.'
+                  : 'Sizes for this model are not listed yet. Contact the SAHAB team to request it.'}{' '}
+                <a href="#contact" className="font-bold text-yellow-accent hover:underline">{lang === 'ar' ? 'تواصل معنا' : 'Contact us'}</a>
+              </p>
+            )}
             <div className="flex flex-wrap gap-2">
               {sortedVariants.map((variant) => (
                 <button

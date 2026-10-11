@@ -123,6 +123,7 @@ export default function CategoryManager() {
         <div>
           <h1 className="text-2xl lg:text-3xl font-black text-base-primary mb-1">{lang === 'ar' ? 'إدارة الفئات' : 'Category Management'}</h1>
           <p className="text-base-muted text-sm">{lang === 'ar' ? `${categories.length} فئة` : `${categories.length} categories`}</p>
+          <p className="text-xs text-base-muted mt-1">{lang === 'ar' ? 'الفئة الجديدة تظهر في صفحة «تأجير المعدات» فوراً، وتُضاف في آخر القائمة (يمكنك ترتيبها بالأسهم).' : 'A new category shows on the equipment page right away, at the end of the list (reorder with the arrows).'}</p>
         </div>
         <button onClick={openAdd} className="btn-primary text-sm"><Plus size={16} /> {lang === 'ar' ? 'إضافة فئة' : 'Add Category'}</button>
       </div>
@@ -173,7 +174,7 @@ export default function CategoryManager() {
                 <div><label className={labelClass}>{lang === 'ar' ? 'الاسم (عربي)' : 'Name (Arabic)'}</label><input className={inputClass} value={form.name_ar} onChange={(e) => update('name_ar', e.target.value)} /></div>
                 <div><label className={labelClass}>{lang === 'ar' ? 'الاسم (إنجليزي)' : 'Name (English)'}</label><input className={inputClass} value={form.name_en} onChange={(e) => update('name_en', e.target.value)} /></div>
               </div>
-              <div><label className={labelClass}>{lang === 'ar' ? 'الـ Slug' : 'Slug'}</label><input className={inputClass} value={form.slug} onChange={(e) => update('slug', e.target.value)} placeholder="excavators" /></div>
+              <div><label className={labelClass}>{lang === 'ar' ? 'الـ Slug' : 'Slug'}</label><input className={inputClass} value={form.slug} onChange={(e) => update('slug', e.target.value)} placeholder={lang === 'ar' ? 'اختياري — يُنشأ تلقائياً' : 'Optional — generated automatically'} /></div>
               <div><label className={labelClass}>{lang === 'ar' ? 'الأيقونة' : 'Icon'}</label><input className={inputClass} value={form.icon} onChange={(e) => update('icon', e.target.value)} placeholder="HardHat" /></div>
               <ImageUploader
                 bucket="equipment-images"
