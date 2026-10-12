@@ -3,23 +3,35 @@ import { Eye, EyeOff, ArrowRight, ArrowLeft, User, Mail, Phone, Lock, CheckCircl
 import { useApp } from '@/contexts/AppContext';
 import { useCustomer } from '../CustomerContext';
 import { supabase } from '@/lib/supabase';
-import { authReturnUrl, resendConfirmation } from '@/lib/authRedirect';
+import { authReturnUrl, emailSendError, resendConfirmation } from '@/lib/authRedirect';
 import { GoogleSignInButton } from '@/components/AuthExtras';
 import type { AuthView } from '../types';
 
 export default function AuthPages({ initialView = 'login', pendingLabel }: { initialView?: AuthView; pendingLabel?: string }) {
   const { lang, dir } = useApp();
   const { login, register } = useCustomer();
-  const [view, setView] = useState<AuthView>(initialView);
+  const [view, setView] = useState<AuthView>(() => {
+    try {
+      const v = sessionStorage.getItem('sahab.authView');
+      sessionStorage.removeItem('sahab.authView');
+      if (v === 'forgot') return 'forgot';
+    } catch {
+      /* storage unavailable */
+    }
+    return initialView;
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmSentTo, setConfirmSentTo] = useState<string | null>(null);
   const [notConfirmed, setNotConfirmed] = useState(false);
   const [resend, setResend] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
+  const [resendError, setResendError] = useState('');
   const onResend = async (to: string) => {
     setResend('sending');
-    setResend((await resendConfirmation(to)) ? 'sent' : 'failed');
+    const err = await resendConfirmation(to, lang === 'ar');
+    setResendError(err || '');
+    setResend(err ? 'failed' : 'sent');
   };
 
   // Login state
@@ -91,7 +103,7 @@ export default function AuthPages({ initialView = 'login', pendingLabel }: { ini
       setForgotSent(true);
     } catch (err: any) {
       console.error('Password reset failed', err);
-      setError(lang === 'ar' ? 'حدث خطأ، يرجى المحاولة مرة أخرى' : 'An error occurred, please try again');
+      setError(emailSendError(err, lang === 'ar'));
     } finally {
       setForgotLoading(false);
     }
@@ -133,6 +145,7 @@ export default function AuthPages({ initialView = 'login', pendingLabel }: { ini
               <button type="button" onClick={() => onResend(confirmSentTo)} disabled={resend === 'sending' || resend === 'sent'} className="block mt-2 text-xs font-bold text-yellow-accent hover:underline disabled:opacity-60">
                 {resend === 'sent' ? (lang === 'ar' ? 'تم إرسال رابط جديد ✓' : 'New link sent ✓') : (lang === 'ar' ? 'لم يصلك البريد؟ أعد الإرسال' : "Didn't get it? Resend")}
               </button>
+              {resend === 'failed' && !notConfirmed && <span role="alert" className="block mt-1 text-xs text-red-500">{resendError}</span>}
             </div>
           )}
           {view === 'login' && (
@@ -176,7 +189,7 @@ export default function AuthPages({ initialView = 'login', pendingLabel }: { ini
                       {lang === 'ar' ? 'إعادة إرسال رابط التفعيل' : 'Resend activation link'}
                     </button>
                     {resend === 'sent' && <p role="status" className="text-xs text-green-500 text-center">{lang === 'ar' ? 'أرسلنا رابط تفعيل جديداً. تحقق من بريدك (وملف الرسائل غير المرغوب فيها).' : 'We sent a new activation link. Check your inbox (and spam folder).'}</p>}
-                    {resend === 'failed' && <p role="alert" className="text-xs text-red-500 text-center">{lang === 'ar' ? 'تعذر الإرسال الآن، انتظر دقيقة ثم حاول مرة أخرى.' : 'Could not send right now. Wait a minute and try again.'}</p>}
+                    {resend === 'failed' && <p role="alert" className="text-xs text-red-500 text-center">{resendError}</p>}
                   </div>
                 )}
 
