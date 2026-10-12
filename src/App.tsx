@@ -116,11 +116,10 @@ function App() {
   }
 
   if (routeType === 'legal') {
-    const pageId = window.location.hash.replace('#/legal/', '');
     return (
       <AppProvider>
         <SiteContentProvider>
-          <Suspense fallback={<RouteLoading />}><LegalPageView pageId={pageId} /></Suspense>
+          <Suspense fallback={<RouteLoading />}><LegalRoute /></Suspense>
         </SiteContentProvider>
       </AppProvider>
     );
@@ -153,6 +152,21 @@ function App() {
       </SiteContentProvider>
     </AppProvider>
   );
+}
+
+/** Follows the hash so moving between legal pages (privacy → terms) updates without a refresh. */
+function LegalRoute() {
+  const read = () => decodeURIComponent(window.location.hash.replace('#/legal/', '').split(/[?#]/)[0]);
+  const [pageId, setPageId] = useState(read);
+  useEffect(() => {
+    const onHash = () => {
+      setPageId(read());
+      window.scrollTo(0, 0);
+    };
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+  return <LegalPageView key={pageId} pageId={pageId} />;
 }
 
 export default App;
