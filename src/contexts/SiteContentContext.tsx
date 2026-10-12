@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
+import { LEGAL_ENGLISH_FALLBACK } from '@/content/legalEnglish';
 
 export interface SiteBanner {
   id: string;
@@ -18,6 +19,9 @@ export interface SiteBanner {
 export interface SiteSettings {
   company_name_ar: string;
   company_name_en: string;
+  /** Official registered name, shown in both languages in the footer. */
+  legal_name_ar: string;
+  legal_name_en: string;
   phone: string;
   whatsapp: string;
   email: string;
@@ -67,6 +71,8 @@ const SiteContentContext = createContext<SiteContentValue | undefined>(undefined
 const defaultSettings: SiteSettings = {
   company_name_ar: 'سحاب',
   company_name_en: 'SAHAB',
+  legal_name_ar: '',
+  legal_name_en: '',
   phone: '',
   whatsapp: '',
   email: '',
@@ -108,7 +114,13 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
       ]);
       if (bannerRes.data) setBanners(bannerRes.data as SiteBanner[]);
       setSettings((settingsRes.data as SiteSettings) || defaultSettings);
-      if (legalRes.data) setLegalPages(legalRes.data as LegalPage[]);
+      if (legalRes.data) {
+        setLegalPages(
+          (legalRes.data as LegalPage[]).map((p) =>
+            p.content_en?.trim() || !LEGAL_ENGLISH_FALLBACK[p.id] ? p : { ...p, content_en: LEGAL_ENGLISH_FALLBACK[p.id] },
+          ),
+        );
+      }
     } catch {
       setSettings(defaultSettings);
     } finally {

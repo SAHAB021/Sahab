@@ -248,6 +248,10 @@ function SettingsManager({ lang }: { lang: 'ar' | 'en' }) {
       {/* Commercial / Registration */}
       <div className="space-y-3">
         <h3 className="text-sm font-bold text-base-primary border-b border-base pb-2">{isRtl ? 'المعلومات التجارية' : 'Commercial Info'}</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div><label className={labelClass}>{isRtl ? 'الاسم التجاري الرسمي (عربي)' : 'Official company name (Arabic)'}</label><input className={inputClass} value={settings.legal_name_ar} onChange={(e) => update('legal_name_ar', e.target.value)} /></div>
+          <div><label className={labelClass}>{isRtl ? 'الاسم التجاري الرسمي (إنجليزي)' : 'Official company name (English)'}</label><input className={inputClass} dir="ltr" value={settings.legal_name_en} onChange={(e) => update('legal_name_en', e.target.value)} /></div>
+        </div>
         <div className="grid grid-cols-2 gap-3">
           <div><label className={labelClass}>{isRtl ? 'الرقم الوطني الموحد' : 'Unified National Number'}</label><input className={inputClass} value={settings.unified_number} onChange={(e) => update('unified_number', e.target.value)} /></div>
           <div><label className={labelClass}>{isRtl ? 'رقم السجل التجاري' : 'CR Number'}</label><input className={inputClass} value={settings.cr_number} onChange={(e) => update('cr_number', e.target.value)} /></div>

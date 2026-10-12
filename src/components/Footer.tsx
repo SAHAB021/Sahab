@@ -19,8 +19,8 @@ export default function Footer() {
   const isRtl = lang === 'ar';
 
   const companyName = isRtl ? (settings?.company_name_ar || 'سحاب') : (settings?.company_name_en || 'SAHAB');
-  const companyFullNameAr = settings?.company_name_ar || t.footer.companyNameAr;
-  const companyFullNameEn = settings?.company_name_en || t.footer.companyNameEn;
+  const companyFullNameAr = settings?.legal_name_ar?.trim() || t.footer.companyNameAr;
+  const companyFullNameEn = settings?.legal_name_en?.trim() || t.footer.companyNameEn;
   const companyDesc = isRtl
     ? 'تأجير المعدات الثقيلة وخدمات المقاولات والإنشاءات للمشاريع الصناعية والتجارية'
     : 'Heavy equipment rental and contracting services for industrial and commercial projects';
@@ -202,7 +202,8 @@ export default function Footer() {
             <ul className="space-y-2">
               <li className="text-sm text-base-muted">
                 {isRtl ? 'الاسم التجاري' : 'Company Name'}:
-                <span className="text-base-primary block text-xs mt-0.5">{isRtl ? companyFullNameAr : companyFullNameEn}</span>
+                <span className="text-base-primary block text-sm font-semibold mt-0.5" lang="ar" dir="rtl" style={{ textAlign: isRtl ? 'right' : 'left' }}>{companyFullNameAr}</span>
+                <span className="text-base-primary block text-sm font-semibold mt-0.5" lang="en" dir="ltr" style={{ textAlign: isRtl ? 'right' : 'left' }}>{companyFullNameEn}</span>
               </li>
               {unifiedNumber && (
                 <li className="text-sm text-base-muted">
