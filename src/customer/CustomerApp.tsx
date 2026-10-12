@@ -5,6 +5,7 @@ import { useCustomer } from './CustomerContext';
 import AuthPages from './components/AuthPages';
 import CompanyOnboarding from './components/CompanyOnboarding';
 import CustomerRouter from './CustomerRouter';
+import SetNewPasswordModal from './components/SetNewPasswordModal';
 import { clearPendingRequest, loadPendingRequest } from '@/lib/pendingRequest';
 import { submitPublicRequest } from '@/lib/publicRequests';
 import { takeAuthNotice, type AuthNotice } from '@/lib/authRedirect';
@@ -51,13 +52,14 @@ export default function CustomerApp() {
   const [sendError, setSendError] = useState<string | null>(null);
   const sending = useRef(false);
   const [notice, setNotice] = useState<AuthNotice | null>(null);
+  const [choosingPassword, setChoosingPassword] = useState(false);
   const closeNotice = useCallback(() => setNotice(null), []);
 
   useEffect(() => {
     const n = takeAuthNotice();
     if (!n) return;
-    setNotice(n);
-    if (n === 'recovery') setView('settings');
+    if (n === 'recovery') setChoosingPassword(true);
+    else setNotice(n);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // A request filled in before signing in (e.g. while confirming the email) is sent
@@ -88,7 +90,12 @@ export default function CustomerApp() {
     );
   }
 
-  const toast = notice && <AuthNoticeToast notice={notice} onClose={closeNotice} />;
+  const toast = (
+    <>
+      {notice && <AuthNoticeToast notice={notice} onClose={closeNotice} />}
+      {choosingPassword && isAuthenticated && <SetNewPasswordModal onClose={() => setChoosingPassword(false)} />}
+    </>
+  );
 
   if (!isAuthenticated) {
     return <>{toast}<AuthPages pendingLabel={pending?.label} /></>;

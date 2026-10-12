@@ -100,14 +100,33 @@ export async function signInWithGoogle(): Promise<string | null> {
   return error ? error.message : null;
 }
 
-export async function resendConfirmation(email: string): Promise<boolean> {
+/**
+ * Explains why Supabase refused to send an email right now. Supabase allows one
+ * email per address every ~60 seconds, and only a few per hour on its built-in
+ * mail service.
+ */
+export function emailSendError(err: { status?: number; code?: string; message?: string }, ar: boolean): string {
+  const msg = err.message || '';
+  const secs = msg.match(/after (\d+) seconds?/i)?.[1];
+  if (secs) return ar ? `لحمايتك، انتظر ${secs} ثانية ثم أعد المحاولة.` : `For security, wait ${secs} seconds and try again.`;
+  if (err.status === 429 || /rate limit/i.test(msg) || err.code === 'over_email_send_rate_limit') {
+    return ar
+      ? 'تم الوصول إلى الحد المسموح لإرسال الرسائل مؤقتاً. حاول مرة أخرى بعد قليل (حتى ساعة).'
+      : 'The email sending limit was reached for now. Please try again a little later (up to an hour).';
+  }
+  return ar ? 'تعذر الإرسال الآن، حاول مرة أخرى بعد دقيقة.' : 'Could not send right now. Try again in a minute.';
+}
+
+/** Resends the activation email. Returns null when sent, otherwise a message to show. */
+export async function resendConfirmation(email: string, ar: boolean): Promise<string | null> {
   const { error } = await supabase.auth.resend({
     type: 'signup',
     email: email.trim(),
     options: { emailRedirectTo: authReturnUrl('verified') },
   });
-  if (error) console.error('Resending the confirmation email failed', error);
-  return !error;
+  if (!error) return null;
+  console.error('Resending the confirmation email failed', error);
+  return emailSendError(error, ar);
 }
 
 export const isEmailNotConfirmed = (err: { code?: string; message?: string } | null | undefined) =>

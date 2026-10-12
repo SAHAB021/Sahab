@@ -55,6 +55,7 @@ export default function CustomerGate() {
   const [invalid, setInvalid] = useState<(keyof CompanyProfile)[]>([]);
   const [notConfirmed, setNotConfirmed] = useState(false);
   const [resend, setResend] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
+  const [resendError, setResendError] = useState('');
 
   useEffect(() => {
     openGate = (s) => {
@@ -214,7 +215,9 @@ export default function CustomerGate() {
 
   const onResend = async () => {
     setResend('sending');
-    setResend((await resendConfirmation(email)) ? 'sent' : 'failed');
+    const err = await resendConfirmation(email, ar);
+    setResendError(err || '');
+    setResend(err ? 'failed' : 'sent');
   };
 
   const resendBlock = (
@@ -224,7 +227,7 @@ export default function CustomerGate() {
         {ar ? 'إعادة إرسال رابط التفعيل' : 'Resend activation link'}
       </button>
       {resend === 'sent' && <p role="status" className="text-xs text-green-500 text-center">{ar ? 'أرسلنا رابط تفعيل جديداً. تحقق من بريدك (وملف الرسائل غير المرغوب فيها).' : 'We sent a new activation link. Check your inbox (and spam folder).'}</p>}
-      {resend === 'failed' && <p role="alert" className="text-xs text-red-500 text-center">{ar ? 'تعذر الإرسال الآن، انتظر دقيقة ثم حاول مرة أخرى.' : 'Could not send right now. Wait a minute and try again.'}</p>}
+      {resend === 'failed' && <p role="alert" className="text-xs text-red-500 text-center">{resendError}</p>}
     </div>
   );
 
@@ -303,7 +306,7 @@ export default function CustomerGate() {
                 {ar ? 'تسجيل الدخول' : 'Sign in'}
               </button>
               <div className="flex items-center justify-between text-sm">
-                <a href="#/account" onClick={() => finish(null)} className="text-base-muted hover:text-yellow-accent">{ar ? 'نسيت كلمة المرور؟' : 'Forgot password?'}</a>
+                <a href="#/account" onClick={() => { try { sessionStorage.setItem('sahab.authView', 'forgot'); } catch { /* ignore */ } savePendingRequest(state.pending); finish(null); }} className="text-base-muted hover:text-yellow-accent">{ar ? 'نسيت كلمة المرور؟' : 'Forgot password?'}</a>
                 <button type="button" onClick={() => { setStep('register'); setError(null); }} className="font-bold text-yellow-accent hover:underline">
                   {ar ? 'ليس لديك حساب؟ أنشئ حساباً' : "No account? Create one"}
                 </button>
