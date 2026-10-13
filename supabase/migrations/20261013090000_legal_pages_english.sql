@@ -18,7 +18,6 @@ By using the website or submitting data, the user acknowledges having read this 
 2. Company Details
 
 Name: SAHAB Contracting & Equipment Rental
-Arabic name: شركة سحاب للمقاولات وتأجير المعدات
 
 VAT number: 314790910600003
 Commercial Registration: 7054325480
