@@ -40,7 +40,7 @@ export default function DBPrintableQuotation({ quotation, onClose }: Props) {
         <div className="flex items-start justify-between border-b-2 border-yellow-accent pb-4 mb-6">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-14 h-14 bg-yellow-accent rounded-lg flex items-center justify-center font-black text-black text-2xl">S</div>
+              <img src="/logo.png" alt="" aria-hidden="true" className="w-14 h-14 object-contain shrink-0" />
               <div>
                 <h1 className="text-xl font-black">{ar ? SAHAB_INFO.nameAr : SAHAB_INFO.nameEn}</h1>
                 <p className="text-xs text-gray-500">{ar ? SAHAB_INFO.addressAr : SAHAB_INFO.addressEn}</p>
