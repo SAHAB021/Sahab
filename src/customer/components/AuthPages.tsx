@@ -121,7 +121,7 @@ export default function AuthPages({ initialView = 'login', pendingLabel }: { ini
         {/* Logo */}
         <div className="text-center mb-8">
           <a href="#home" className="inline-flex items-center gap-2 mb-2">
-            <div className="w-12 h-12 bg-yellow-accent rounded-lg flex items-center justify-center font-black text-black text-2xl">S</div>
+            <img src="/logo.png" alt="" aria-hidden="true" className="w-12 h-12 object-contain shrink-0" />
             <div className="text-start">
               <div className="text-2xl font-black text-base-primary">SAHAB</div>
               <div className="text-xs text-base-muted">{lang === 'ar' ? 'معدات ومقاولات' : 'EQUIPMENT & CONTRACTING'}</div>

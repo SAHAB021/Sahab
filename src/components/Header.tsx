@@ -106,10 +106,7 @@ export default function Header() {
           {/* Logo */}
           <a href="#home" className="flex items-center gap-2 group min-w-0 shrink">
             <div className="relative">
-              <div className="w-10 h-10 lg:w-12 lg:h-12 bg-yellow-accent rounded-lg flex items-center justify-center font-black text-black text-xl lg:text-2xl transition-transform group-hover:scale-105">
-                S
-              </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-yellow-accent rounded-sm opacity-60" />
+              <img src="/logo.png" alt="" aria-hidden="true" className="w-10 h-10 lg:w-12 lg:h-12 transition-transform group-hover:scale-105 object-contain shrink-0" />
             </div>
             <div className="flex flex-col leading-none min-w-0">
               {lang === 'ar' && settings?.logo_ar ? (
