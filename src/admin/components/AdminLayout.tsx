@@ -60,7 +60,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside className="hidden md:flex flex-col w-64 bg-elevated border-e border-base sticky top-0 h-screen">
         <div className="p-5 border-b border-base">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="" aria-hidden="true" className="w-10 h-10 object-contain shrink-0" />
+            <img src="/logo.png" alt="" aria-hidden="true" className="w-10 h-10 object-contain shrink-0 rounded-lg" />
             <div>
               <div className="text-sm font-black text-base-primary">SAHAB Admin</div>
               <div className="text-xs text-base-muted">{lang === 'ar' ? 'إدارة المعدات' : 'Equipment Management'}</div>
@@ -129,7 +129,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-elevated border-b border-base">
         <div className="flex items-center justify-between px-4 h-14">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="" aria-hidden="true" className="w-8 h-8 object-contain shrink-0" />
+            <img src="/logo.png" alt="" aria-hidden="true" className="w-8 h-8 object-contain shrink-0 rounded-lg" />
             <span className="text-sm font-black text-base-primary">SAHAB Admin</span>
           </div>
           <div className="flex items-center gap-2">

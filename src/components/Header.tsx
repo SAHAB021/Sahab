@@ -106,7 +106,7 @@ export default function Header() {
           {/* Logo */}
           <a href="#home" className="flex items-center gap-2 group min-w-0 shrink">
             <div className="relative">
-              <img src="/logo.png" alt="" aria-hidden="true" className="w-10 h-10 lg:w-12 lg:h-12 transition-transform group-hover:scale-105 object-contain shrink-0" />
+              <img src="/logo.png" alt="" aria-hidden="true" className="w-10 h-10 lg:w-12 lg:h-12 transition-transform group-hover:scale-105 object-contain shrink-0 rounded-lg" />
             </div>
             <div className="flex flex-col leading-none min-w-0">
               {lang === 'ar' && settings?.logo_ar ? (

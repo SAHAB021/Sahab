@@ -30,7 +30,7 @@ export default function AdminLogin() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <img src="/logo.png" alt="" aria-hidden="true" className="w-16 h-16 mx-auto mb-4 object-contain shrink-0" />
+          <img src="/logo.png" alt="" aria-hidden="true" className="w-16 h-16 mx-auto mb-4 object-contain shrink-0 rounded-lg" />
           <h1 className="text-2xl font-black text-base-primary">SAHAB Admin</h1>
           <p className="text-sm text-base-muted mt-1">{ar ? 'تسجيل الدخول للوحة التحكم' : 'Sign in to admin dashboard'}</p>
         </div>

@@ -83,7 +83,7 @@ export default function Footer() {
           <div className="space-y-4">
             <div className="flex items-center gap-2.5">
               <div className="relative">
-                <img src="/logo.png" alt="" aria-hidden="true" className="w-11 h-11 object-contain shrink-0" />
+                <img src="/logo.png" alt="" aria-hidden="true" className="w-11 h-11 object-contain shrink-0 rounded-lg" />
                 </div>
               <div className="flex flex-col leading-none">
                 {logoUrl ? (
