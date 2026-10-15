@@ -5,7 +5,6 @@ import { useCustomer } from './CustomerContext';
 import AuthPages from './components/AuthPages';
 import CompanyOnboarding from './components/CompanyOnboarding';
 import CustomerRouter from './CustomerRouter';
-import SetNewPasswordModal from './components/SetNewPasswordModal';
 import { clearPendingRequest, loadPendingRequest } from '@/lib/pendingRequest';
 import { submitPublicRequest } from '@/lib/publicRequests';
 import { takeAuthNotice, type AuthNotice } from '@/lib/authRedirect';
@@ -13,9 +12,9 @@ import { takeAuthNotice, type AuthNotice } from '@/lib/authRedirect';
 const NOTICES: Record<AuthNotice, { ok: boolean; ar: [string, string]; en: [string, string] }> = {
   verified: { ok: true, ar: ['تم تفعيل حسابك بنجاح ✓', 'مرحباً بك في سحاب. يمكنك الآن إرسال طلباتك ومتابعتها من حسابك.'], en: ['Your account is verified ✓', 'Welcome to SAHAB. You can now send and track your requests from your account.'] },
   google: { ok: true, ar: ['تم تسجيل الدخول باستخدام Google', 'مرحباً بك في سحاب.'], en: ['Signed in with Google', 'Welcome to SAHAB.'] },
-  recovery: { ok: true, ar: ['تم التحقق من بريدك', 'اختر كلمة مرور جديدة من صفحة الإعدادات.'], en: ['Email verified', 'Choose a new password on the Settings page.'] },
   'link-expired': { ok: false, ar: ['انتهت صلاحية الرابط', 'الرابط منتهي أو استُخدم من قبل. سجّل الدخول، وإن لم يكن حسابك مفعّلاً اطلب رابط تفعيل جديداً.'], en: ['This link has expired', 'The link expired or was already used. Sign in, and if your account is not active yet request a new activation link.'] },
   'link-error': { ok: false, ar: ['تعذر التحقق من الرابط', 'سجّل الدخول، وإن لم يكن حسابك مفعّلاً اطلب رابط تفعيل جديداً.'], en: ['We could not verify the link', 'Sign in, and if your account is not active yet request a new activation link.'] },
+  'reset-link-expired': { ok: false, ar: ['رابط استعادة كلمة المرور منتهي', 'الرابط منتهي أو استُخدم من قبل. اضغط "نسيت كلمة المرور؟" واطلب رابطاً جديداً، ثم افتح أحدث رسالة فقط.'], en: ['This password reset link has expired', 'The link expired or was already used. Click "Forgot password?" to get a new one, then open only the newest email.'] },
   'oauth-error': { ok: false, ar: ['تعذر تسجيل الدخول عبر Google', 'حاول مرة أخرى أو سجّل الدخول بالبريد الإلكتروني.'], en: ['Google sign-in failed', 'Try again or sign in with your email.'] },
 };
 
@@ -52,15 +51,13 @@ export default function CustomerApp() {
   const [sendError, setSendError] = useState<string | null>(null);
   const sending = useRef(false);
   const [notice, setNotice] = useState<AuthNotice | null>(null);
-  const [choosingPassword, setChoosingPassword] = useState(false);
   const closeNotice = useCallback(() => setNotice(null), []);
 
   useEffect(() => {
     const n = takeAuthNotice();
     if (!n) return;
-    if (n === 'recovery') setChoosingPassword(true);
-    else setNotice(n);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    setNotice(n);
+  }, []);
 
   // A request filled in before signing in (e.g. while confirming the email) is sent
   // once the customer is signed in with a company profile.
@@ -93,7 +90,6 @@ export default function CustomerApp() {
   const toast = (
     <>
       {notice && <AuthNoticeToast notice={notice} onClose={closeNotice} />}
-      {choosingPassword && isAuthenticated && <SetNewPasswordModal onClose={() => setChoosingPassword(false)} />}
     </>
   );
 

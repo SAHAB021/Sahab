@@ -1,4 +1,5 @@
 import { AppProvider } from '@/contexts/AppContext';
+import PasswordRecovery from '@/components/PasswordRecovery';
 import { SiteContentProvider } from '@/contexts/SiteContentContext';
 import { DeliveryProvider } from '@/admin/DeliveryContext';
 import { NotificationProvider } from '@/admin/NotificationContext';
@@ -33,6 +34,7 @@ export default function CustomerRoot() {
         </QuotationProvider>
       </RentalProvider>
       </SiteContentProvider>
+      <PasswordRecovery />
     </AppProvider>
   );
 }

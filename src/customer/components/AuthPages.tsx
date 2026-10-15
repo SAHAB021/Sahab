@@ -86,7 +86,7 @@ export default function AuthPages({ initialView = 'login', pendingLabel }: { ini
 
   const [forgotLoading, setForgotLoading] = useState(false);
 
-  const handleForgot = async (e: React.FormEvent) => {
+  const handleForgot = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setError(null);
     if (!forgotEmail.trim() || !forgotEmail.includes('@')) {
@@ -294,8 +294,16 @@ export default function AuthPages({ initialView = 'login', pendingLabel }: { ini
                     <CheckCircle size={32} className="text-green-500" />
                   </div>
                   <p className="text-sm text-base-primary font-semibold">{lang === 'ar' ? 'تم إرسال تعليمات الاستعادة' : 'Reset instructions sent'}</p>
-                  <p className="text-xs text-base-muted">{lang === 'ar' ? 'تحقق من بريدك الإلكتروني' : 'Check your email'}</p>
-                  <button onClick={() => { setView('login'); setForgotSent(false); }} className="btn-secondary w-full justify-center">
+                  <p className="text-xs text-base-muted">
+                    {lang === 'ar' ? 'إذا كان هذا البريد مسجلاً فستصلك رسالة على ' : 'If this email has an account, a reset link was sent to '}
+                    <bdi className="font-bold text-base-primary">{forgotEmail.trim()}</bdi>
+                    {lang === 'ar' ? '. افتح الرابط في نفس المتصفح، وتحقق من مجلد الرسائل غير المرغوب فيها.' : '. Open the link in this browser, and check your spam folder.'}
+                  </p>
+                  {error && <div role="alert" className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-500 text-sm">{error}</div>}
+                  <button type="button" onClick={handleForgot} disabled={forgotLoading} className="btn-primary w-full justify-center disabled:opacity-60">
+                    {forgotLoading ? (lang === 'ar' ? 'جاري الإرسال...' : 'Sending...') : (lang === 'ar' ? 'إرسال الرابط مرة أخرى' : 'Send the link again')}
+                  </button>
+                  <button onClick={() => { setView('login'); setForgotSent(false); setError(null); }} className="btn-secondary w-full justify-center">
                     {lang === 'ar' ? 'العودة لتسجيل الدخول' : 'Back to Login'}
                   </button>
                 </div>
