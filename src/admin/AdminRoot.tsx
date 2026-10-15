@@ -1,4 +1,5 @@
 import { AppProvider } from '@/contexts/AppContext';
+import PasswordRecovery from '@/components/PasswordRecovery';
 import { SiteContentProvider } from '@/contexts/SiteContentContext';
 import { CatalogProvider } from '@/catalog/CatalogContext';
 import { AdminProvider } from '@/admin/AdminContext';
@@ -54,6 +55,7 @@ export default function AdminRoot() {
         </QuotationProvider>
       </RentalProvider>
       </SiteContentProvider>
+      <PasswordRecovery />
     </AppProvider>
   );
 }
